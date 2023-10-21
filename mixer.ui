@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>564</width>
-    <height>240</height>
+    <height>203</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
-      <widget class="QGraphicsView" name="graphicsView_4"/>
+      <widget class="QGraphicsView" name="sin_graphics_view"/>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -31,7 +31,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_4">
+          <widget class="QLineEdit" name="signalName">
            <property name="text">
             <string/>
            </property>
@@ -49,7 +49,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit"/>
+          <widget class="QLineEdit" name="signalFrequency"/>
          </item>
         </layout>
        </item>
@@ -63,7 +63,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_2"/>
+          <widget class="QLineEdit" name="signalMagnitude"/>
          </item>
         </layout>
        </item>
@@ -77,12 +77,12 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_3"/>
+          <widget class="QLineEdit" name="signalPhase"/>
          </item>
         </layout>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="add_push_btn">
          <property name="text">
           <string>ADD</string>
          </property>
