@@ -23,7 +23,7 @@
          <widget class="PlotWidget" name="graphicsView"/>
         </item>
         <item>
-         <widget class="QSlider" name="horizontalSlider_2">
+         <widget class="QSlider" name="noise_slider">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -37,7 +37,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QSlider" name="horizontalSlider">
+         <widget class="QSlider" name="freq_slider">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>

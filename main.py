@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QApplication, QFileDialog
 from mixer import MixerApp
 import pandas as pd
 import pyqtgraph as pg
+import random  # Import the random module to add noise
 import os
 import sys
 from os import path
@@ -25,38 +26,37 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
         self.signals_data = {}  # Define signals_data as a class attribute
         self.count_signals = 0
         self.file_names= []
+        self.noise_slider.setOrientation(Qt.Horizontal)
+        self.noise_slider.setRange(0, 100)  # Set the range of the noise level as per your requirements
+        self.noise_level = 0  # Initialize the noise level
         self.handle_btn()
     
     def handle_btn(self):
         self.actionOpen_file.triggered.connect(self.add_signal)
         self.mix_signal_btn.triggered.connect(self.open_mixer)
+        self.noise_slider.valueChanged.connect(self.update_noise_level)
+
+
     def open_mixer(self):
         self.mixer = MixerApp()
         self.mixer.show()
-    
-    
-    
+
     def plot_graph(self):
-        if self.way_of_plotting_with_add : 
-        #self.color_detect(self.signals_data)
-        #self.graphicsView_1.setObjectName("graphicsView_1")
-    
-        
-        #self.graphicsView_1.setXRange(0, 616 * self.first_element_of_time)
+        self.graphicsView.clear()
+        if self.way_of_plotting_with_add :
             for value in self.signals_data.values():
                 
                 pen = pg.mkPen(color=(255 , 0 , 0))
                 x = value[0]
                 y = value[1]
-                data_line = self.graphicsView.plot(x, y, pen=pen)
+                # Apply noise to 'y' values
+                noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in y]
+                data_line = self.graphicsView.plot(x, noisy_y, pen=pen)
                 data_line.x_data = x
                 data_line.y_data = y
         
         if not self.signals_data:
             return
-        
-        #self.max_range_1()
-        #self.graphicsView_1.setYRange(-self.max_y_1, self.max_y_1)
         
     
     def add_signal(self):
@@ -82,11 +82,11 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             self.comboBox_2.addItem(f"{'Signal'} - {self.count_signals}")
             self.way_of_plotting_with_add = True
          self.plot_graph()    
-        
-        # Update the table with the latest data
-        
 
 
+    def update_noise_level(self, value):
+        self.noise_level = value / 100
+        self.plot_graph()
 
 
 def main():  # method to start app
