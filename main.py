@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.uic import loadUiType
 from PyQt5.QtWidgets import QApplication, QFileDialog
-
+from mixer import MixerApp
 import pandas as pd
 import pyqtgraph as pg
 import os
@@ -29,29 +29,32 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
     
     def handle_btn(self):
         self.actionOpen_file.triggered.connect(self.add_signal)
+        self.mix_signal_btn.triggered.connect(self.open_mixer)
+    def open_mixer(self):
+        self.mixer = MixerApp()
+        self.mixer.show()
     
     
     
-    
-    def plot_graph(self , ):
+    def plot_graph(self):
+        if self.way_of_plotting_with_add : 
         #self.color_detect(self.signals_data)
         #self.graphicsView_1.setObjectName("graphicsView_1")
-        self.data_lines = []
+    
         
         #self.graphicsView_1.setXRange(0, 616 * self.first_element_of_time)
-        for value in self.signals_data.values():
-            
-           pen = pg.mkPen(color=(255 , 0 , 0))
-           x = value[0]
-           y = value[1]
-           data_line = self.graphicsView.plot(x, y, pen=pen)
-           data_line.x_data = x
-           data_line.y_data = y
-           self.data_lines.append(data_line)
+            for value in self.signals_data.values():
+                
+                pen = pg.mkPen(color=(255 , 0 , 0))
+                x = value[0]
+                y = value[1]
+                data_line = self.graphicsView.plot(x, y, pen=pen)
+                data_line.x_data = x
+                data_line.y_data = y
+        
         if not self.signals_data:
             return
-        self.end_1 = 616 * self.first_element_of_time # Sets the end of the x range
-
+        
         #self.max_range_1()
         #self.graphicsView_1.setYRange(-self.max_y_1, self.max_y_1)
         
@@ -77,7 +80,7 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             # Making a new item in the dictionary, the new signal is given a key, and the values is given according to its data
             self.signals_data[self.count_signals] = [time_values, v_values, 'Red', f"{'Signal'} - {self.count_signals}", file_name]
             self.comboBox_2.addItem(f"{'Signal'} - {self.count_signals}")
-            self.start_flag_1 = False
+            self.way_of_plotting_with_add = True
          self.plot_graph()    
         
         # Update the table with the latest data

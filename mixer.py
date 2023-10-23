@@ -13,10 +13,10 @@ import pyqtgraph as pg
 FORM_CLASS, _ = loadUiType(path.join(path.dirname(__file__), "mixer.ui"))  # connects the Ui file with the Python file
 
 
-class MainApp(QDialog, FORM_CLASS):  # go to the main window in the form_class file
+class MixerApp(QDialog, FORM_CLASS):  # go to the main window in the form_class file
 
     def __init__(self, parent=None):  # constructor to initiate the main window  in the design
-        super(MainApp, self).__init__(parent)
+        super(MixerApp, self).__init__(parent)
         self.setupUi(self)
         self.handle_btn()
         self.sin_time = np.linspace(0, 2, 1000) 
@@ -53,7 +53,7 @@ class MainApp(QDialog, FORM_CLASS):  # go to the main window in the form_class f
 
 def main():  # method to start app
         app = QApplication(sys.argv)
-        window = MainApp()
+        window = MixerApp()
         window.show()
         app.exec_()  # infinte Loop
 
