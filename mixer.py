@@ -8,6 +8,7 @@ import os
 import sys
 from os import path
 import numpy as np
+import pyqtgraph as pg
 
 FORM_CLASS, _ = loadUiType(path.join(path.dirname(__file__), "mixer.ui"))  # connects the Ui file with the Python file
 
@@ -30,7 +31,7 @@ class MainApp(QDialog, FORM_CLASS):  # go to the main window in the form_class f
         self.sin_phase = float(self.signalPhase.text())
         self.sinusoidal = sine_wave(frequency=self.sin_frequency, samplerate=len(
          self.sin_time), amplitude=self.sin_magnitude, phaseshift=self.sin_phase)
-        self.add_sinusoidal(self.sinusoidal)
+        #self.add_sinusoidal(self.sinusoidal)
         self.sin_graphics_view.clear()
         self.sin_graphics_view.plot(self.sin_time, self.sinusoidal, pen=pg.mkPen(color=(255, 0, 0)))
         print(self.sin_frequency)

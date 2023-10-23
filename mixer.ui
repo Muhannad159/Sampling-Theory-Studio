@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
-      <widget class="QGraphicsView" name="sin_graphics_view"/>
+      <widget class="PlotWidget" name="sin_graphics_view"/>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -104,6 +104,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
