@@ -21,6 +21,8 @@ class MainApp(QDialog, FORM_CLASS):  # go to the main window in the form_class f
         self.handle_btn()
         self.sin_time = np.linspace(0, 2, 1000) 
         self.sinusoidals = [] 
+        self.sin_names = []
+        self.sin_graphics_view.setBackground('w')
 
     def handle_btn(self):
           self.add_push_btn.clicked.connect(self.construct_signal)
@@ -29,14 +31,25 @@ class MainApp(QDialog, FORM_CLASS):  # go to the main window in the form_class f
         self.sin_frequency = float(self.signalFrequency.text())
         self.sin_magnitude = float(self.signalMagnitude.text())
         self.sin_phase = float(self.signalPhase.text())
+        self.sin_name = self.signalName.text()
         self.sinusoidal = sine_wave(frequency=self.sin_frequency, samplerate=len(
          self.sin_time), amplitude=self.sin_magnitude, phaseshift=self.sin_phase)
-        #self.add_sinusoidal(self.sinusoidal)
-        self.sin_graphics_view.clear()
-        self.sin_graphics_view.plot(self.sin_time, self.sinusoidal, pen=pg.mkPen(color=(255, 0, 0)))
-        print(self.sin_frequency)
-
+        self.sinusoidals.append(self.sinusoidal)
+        self.sin_names.append(self.sin_name)
+        self.drawSyntheticSignal()
+       
     
+    def drawSyntheticSignal(self):
+        self.syntheticSignal = [0]*self.sin_time
+        for sinusoidal in self.sinusoidals:
+            self.syntheticSignal += sinusoidal
+        self.sin_graphics_view.clear()
+        self.sin_graphics_view.plot(self.sin_time, self.syntheticSignal, pen=pg.mkPen(color=(255, 0, 0)))
+       
+
+
+
+ 
 
 def main():  # method to start app
         app = QApplication(sys.argv)
