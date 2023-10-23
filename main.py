@@ -35,7 +35,25 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
         self.actionOpen_file.triggered.connect(self.add_signal)
         self.mix_signal_btn.triggered.connect(self.open_mixer)
         self.noise_slider.valueChanged.connect(self.update_noise_level)
+        self.delete_btn.clicked.connect(self.delete_signal)  # Connect the delete button here
 
+
+
+
+    def delete_signal(self):
+        if not self.signals_data:
+            return  # No items in the dictionary to delete
+
+        selected_item_text = self.comboBox_2.currentText()  # Get the currently selected item text
+        selected_signal_index = int(selected_item_text.split('-')[-1].strip())  # Extract the signal index
+        self.count_signals -= 1
+
+        if selected_signal_index in self.signals_data:
+            del self.signals_data[selected_signal_index]
+
+        self.comboBox_2.removeItem(self.comboBox_2.currentIndex())  # Remove the selected item from the combobox
+        self.way_of_plotting_with_add = True
+        self.plot_graph()  # Update the plot immediately after deletion
 
     def open_mixer(self):
         self.mixer = MixerApp()
