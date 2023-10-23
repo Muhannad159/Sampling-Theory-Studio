@@ -25,7 +25,7 @@ class MixerApp(QDialog, FORM_CLASS):  # go to the main window in the form_class 
         self.sin_graphics_view.setBackground('w')
 
     def handle_btn(self):
-          self.add_push_btn.clicked.connect(self.construct_signal)
+          self.plot_push_btn.clicked.connect(self.construct_signal)
 
     def construct_signal(self):
         self.sin_frequency = float(self.signalFrequency.text())
