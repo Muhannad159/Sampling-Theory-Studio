@@ -10,6 +10,7 @@ import pyqtgraph as pg
 import random  # Import the random module to add noise
 import os
 import sys
+import numpy as np
 from os import path
 
 FORM_CLASS, _ = loadUiType(path.join(path.dirname(__file__), "main.ui"))  # connects the Ui file with the Python file
@@ -30,13 +31,15 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
         self.noise_slider.setRange(0, 100)  # Set the range of the noise level as per your requirements
         self.noise_level = 0  # Initialize the noise level
         self.handle_btn()
+        self.fs = 100
+        
     
     def handle_btn(self):
         self.actionOpen_file.triggered.connect(self.add_signal)
         self.mix_signal_btn.triggered.connect(self.open_mixer)
         self.noise_slider.valueChanged.connect(self.update_noise_level)
         self.delete_btn.clicked.connect(self.delete_signal)  # Connect the delete button here
-
+        self.freq_slider.valueChanged.connect(self.update_fs)
 
 
 
@@ -58,24 +61,48 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
     def open_mixer(self):
         self.mixer = MixerApp()
         self.mixer.show()
-
+ 
+                        
     def plot_graph(self):
         self.graphicsView.clear()
-        if self.way_of_plotting_with_add :
+        if self.way_of_plotting_with_add:
             for value in self.signals_data.values():
-                
-                pen = pg.mkPen(color=(255 , 0 , 0))
+                pen = pg.mkPen(color=(255, 0, 0))
                 x = value[0]
                 y = value[1]
+                
                 # Apply noise to 'y' values
                 noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in y]
+                
+                # Set the sampling rate
+                # Adjust the sampling rate as needed
+                
+                
+                # Sample the continuous signal
+                #sampled_x = np.linspace(0, max(x), len(x), endpoint=False)
+                sampled_x = np.linspace(0, max(x), self.fs, endpoint=False)
+                #print(sampled_x)
+                sampled_y = [y[np.argmin(np.abs(x - x_sample))] for x_sample in sampled_x]
+                
+                # Plot the noisy signal
                 data_line = self.graphicsView.plot(x, noisy_y, pen=pen)
-                data_line.x_data = x
-                data_line.y_data = y
-        
-        if not self.signals_data:
-            return
-        
+                
+                # Plot the sampled points
+                sampled_points = self.graphicsView.plot(sampled_x, sampled_y, pen=None, symbol='o', symbolBrush='b')
+                
+                # Perform reconstruction (original signal, not sampled)
+                reconstructed_signal = np.zeros_like(x)
+                for n, sample in enumerate(sampled_y):
+                    reconstructed_signal += sample * np.sinc((x - sampled_x[n]) / (1 / self.fs))
+                    #print(reconstructed_signal)
+                
+                # Plot the reconstructed signal
+                reconstruction_pen = pg.mkPen(color=(0, 0, 255))
+                self.graphicsView_2.plot(x, reconstructed_signal, pen=reconstruction_pen)
+
+   
+
+            
     
     def add_signal(self):
          options  = QFileDialog().options()
@@ -106,7 +133,11 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
         self.noise_level = value / 100
         self.plot_graph()
 
-
+    def update_fs(self,value ):
+         self.fs = value*10
+         self.graphicsView_2.clear()
+         self.plot_graph()
+        
 def main():  # method to start app
         app = QApplication(sys.argv)
         window = MainApp()
