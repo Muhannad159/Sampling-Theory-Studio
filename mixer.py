@@ -34,12 +34,12 @@ class MixerApp(QDialog, FORM_CLASS):  # go to the main window in the form_class 
         self.sin_phase = float(self.signalPhase.text())
         self.sin_name = self.signalName.text()
         self.sinusoidal = sine_wave(frequency=self.sin_frequency, samplerate=len(
-         self.sin_time), amplitude=self.sin_magnitude, phaseshift=self.sin_phase)
+            self.sin_time), amplitude=self.sin_magnitude, phaseshift=self.sin_phase)
         self.sinusoidals.append(self.sinusoidal)
         self.sin_names.append(self.sin_name)
         self.drawSyntheticSignal()
-       
-    
+        self.lcdNumber.display(self.overall_max_frequency)
+
     def drawSyntheticSignal(self):
         self.syntheticSignal = [0]*self.sin_time
         for sinusoidal in self.sinusoidals:
