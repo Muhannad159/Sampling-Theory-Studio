@@ -56,13 +56,14 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
 
         self.comboBox_2.removeItem(self.comboBox_2.currentIndex())  # Remove the selected item from the combobox
         self.way_of_plotting_with_add = True
+        self.clear_all()
         self.plot_graph()  # Update the plot immediately after deletion
 
     def open_mixer(self):
         self.mixer = MixerApp()
         self.mixer.show()
- 
-                        
+
+
     def plot_graph(self):
         self.graphicsView.clear()
         if self.way_of_plotting_with_add:
@@ -70,40 +71,55 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 pen = pg.mkPen(color=(255, 0, 0))
                 x = value[0]
                 y = value[1]
-                
+
                 # Apply noise to 'y' values
                 noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in y]
-                
+
                 # Set the sampling rate
                 # Adjust the sampling rate as needed
-                
-                
+
+
                 # Sample the continuous signal
-                #sampled_x = np.linspace(0, max(x), len(x), endpoint=False)
                 sampled_x = np.linspace(0, max(x), self.fs, endpoint=False)
-                #print(sampled_x)
-                sampled_y = [y[np.argmin(np.abs(x - x_sample))] for x_sample in sampled_x]
-                
+                sampled_y = [noisy_y[np.argmin(np.abs(x - x_sample))] for x_sample in sampled_x]
+
                 # Plot the noisy signal
-                data_line = self.graphicsView.plot(x, noisy_y, pen=pen)
-                
+                self.graphicsView.plot(x, noisy_y, pen=pen)
+
                 # Plot the sampled points
-                sampled_points = self.graphicsView.plot(sampled_x, sampled_y, pen=None, symbol='o', symbolBrush='b')
-                
+                self.graphicsView.plot(sampled_x, sampled_y, pen=None, symbol='o', symbolBrush='b')
+
                 # Perform reconstruction (original signal, not sampled)
                 reconstructed_signal = np.zeros_like(x)
                 for n, sample in enumerate(sampled_y):
                     reconstructed_signal += sample * np.sinc((x - sampled_x[n]) / (1 / self.fs))
-                    #print(reconstructed_signal)
-                
+
                 # Plot the reconstructed signal
                 reconstruction_pen = pg.mkPen(color=(0, 0, 255))
                 self.graphicsView_2.plot(x, reconstructed_signal, pen=reconstruction_pen)
 
-   
+                # Calculate the error between original and reconstructed signals
+                # y_error = np.array(noisy_y) - reconstructed_signal
+                # error_pen = pg.mkPen(color="g")
+                # self.graphicsView_3.plot(x, y_error, pen=error_pen)
+                # print(y_error[0])
+                # print(noisy_y[0])
+                # print(reconstructed_signal[0])
+                # Calculate the error percentage for each data point
+                error_percentage = [(abs(original - reconstructed) / original) * 100 for original, reconstructed in
+                                    zip(noisy_y, reconstructed_signal)]
 
-            
-    
+                # Plot the error percentage
+                error_percentage_pen = pg.mkPen(color="r")
+                self.graphicsView_3.plot(x, error_percentage, pen=error_percentage_pen)
+                print(error_percentage)
+
+
+
+
+
+
+
     def add_signal(self):
          options  = QFileDialog().options()
          options |= QFileDialog.ReadOnly
@@ -128,16 +144,23 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             self.way_of_plotting_with_add = True
          self.plot_graph()    
 
+    def clear_all(self):
+        self.graphicsView.clear()
+        self.graphicsView_2.clear()
+        self.graphicsView_3.clear()
 
     def update_noise_level(self, value):
+        self.clear_all()
         self.noise_level = value / 100
+        self.nsr_lbl.setText(f"Noise to Signal Ratio {str(self.noise_level)}")
         self.plot_graph()
 
-    def update_fs(self,value ):
+    def update_fs(self,value):
          self.fs = value*10
-         self.graphicsView_2.clear()
+         self.freq_lbl.setText(f"Sampling frequency is {str(self.fs)}")
+         self.clear_all()
          self.plot_graph()
-        
+
 def main():  # method to start app
         app = QApplication(sys.argv)
         window = MainApp()
