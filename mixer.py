@@ -10,23 +10,39 @@ from os import path
 import numpy.fft as fft
 import numpy as np
 import pyqtgraph as pg
-
+from main import MainApp
 FORM_CLASS, _ = loadUiType(path.join(path.dirname(__file__), "mixer.ui"))  # connects the Ui file with the Python file
 
 
 class MixerApp(QDialog, FORM_CLASS):  # go to the main window in the form_class file
 
-    def __init__(self, parent=None):  # constructor to initiate the main window  in the design
+    def __init__(self, parent=None ):  # constructor to initiate the main window  in the design
         super(MixerApp, self).__init__(parent)
+        
         self.setupUi(self)
         self.handle_btn()
         self.sin_time = np.linspace(0, 2, 1000) 
         self.sinusoidals = [] 
         self.sin_names = []
         self.sin_graphics_view.setBackground('w')
+        
+        
 
     def handle_btn(self):
           self.plot_push_btn.clicked.connect(self.construct_signal)
+          self.add_push_btn.clicked.connect(self.add_to_main)
+    def add_to_main(self):
+        #print("hello")
+        self.mainapp.graphicsView.clear()
+        self.mainapp.graphicsView_2.clear()
+        self.mainapp.graphicsView_3.clear()
+        self.mainapp.plot_graph()  
+        
+        
+     
+    def set_myapp(self , mainapp):
+        self.mainapp = mainapp
+         
 
     def construct_signal(self):
         self.sin_frequency = float(self.signalFrequency.text())
@@ -53,8 +69,8 @@ class MixerApp(QDialog, FORM_CLASS):  # go to the main window in the form_class 
         self.sampled_signal = self.sample_signal(self.syntheticSignal, self.overall_max_frequency, self.sample_rate)
         if self.sampled_signal is not None:
         # Plot the sampled points as blue dots
-            self.sin_graphics_view.plot(self.sin_time[::len(self.sin_time) // len(self.sampled_signal)],
-                                    self.sampled_signal, pen=None, symbol='o', symbolPen=None, symbolBrush=(0, 0, 255))
+             self.sin_graphics_view.plot(self.sin_time[::len(self.sin_time) // len(self.sampled_signal)],
+                                 self.sampled_signal, pen=None, symbol='o', symbolPen=None, symbolBrush=(0, 0, 255))
 
 
 

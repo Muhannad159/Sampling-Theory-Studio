@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.uic import loadUiType
 from PyQt5.QtWidgets import QApplication, QFileDialog
-from mixer import MixerApp
+
 import pandas as pd
 import pyqtgraph as pg
 import random  # Import the random module to add noise
@@ -31,9 +31,10 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
         self.noise_slider.setOrientation(Qt.Horizontal)
         self.noise_slider.setRange(0, 100)  # Set the range of the noise level as per your requirements
         self.noise_level = 0  # Initialize the noise level
+        self.way_of_plotting_with_add = False
         self.handle_btn()
         self.fs = 100
-
+               
 
     def handle_btn(self):
         self.actionOpen_file.triggered.connect(self.add_signal)
@@ -41,8 +42,10 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
         self.noise_slider.valueChanged.connect(self.update_noise_level)
         self.delete_btn.clicked.connect(self.delete_signal)  # Connect the delete button here
         self.freq_slider.valueChanged.connect(self.update_fs)
-
-
+        
+        
+        
+    
     def reindex_dict_keys(self, dictionary):
         return {i: value for i, (key, value) in enumerate(dictionary.items(), start=1)}
 
@@ -77,9 +80,18 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             self.plot_graph()
 
     def open_mixer(self):
+        from mixer import MixerApp
         self.mixer = MixerApp()
+        self.mixer.set_myapp(self )
         self.mixer.show()
 
+
+    
+
+
+
+    def printt(self):
+        print("hello")
     def plot_graph(self):
         fmax = 0
         self.graphicsView.clear()
@@ -121,8 +133,12 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 # Plot the error
                 error_pen = pg.mkPen(color="r")
                 self.graphicsView_3.plot(x, error, pen=error_pen)
-
-                print(error)
+                self.way_of_plotting_with_add = False
+        else:
+            self.graphicsView.plot(self.mixer.sin_time, self.mixer.syntheticSignal, pen=pg.mkPen(color=(255, 0, 0)))
+            fm = self.mixer.max_freqs
+            print(fm)
+            
 
     def add_signal(self):
          options  = QFileDialog().options()
