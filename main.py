@@ -136,7 +136,7 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 self.way_of_plotting_with_add = False
         else:
             self.graphicsView.plot(self.mixer.sin_time, self.mixer.syntheticSignal, pen=pg.mkPen(color=(255, 0, 0)))
-            fm = self.mixer.max_freqs
+            fm = self.mixer.overall_max_frequency
             print(fm)
             
 
