@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1039</width>
-    <height>724</height>
+    <width>1407</width>
+    <height>807</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,9 +32,12 @@
         <item alignment="Qt::AlignHCenter">
          <widget class="QLabel" name="nsr_lbl">
           <property name="text">
-           <string>Noise</string>
+           <string>Noise to signal ratio</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <widget class="PlotWidget" name="graphicsView_2"/>
         </item>
         <item>
          <widget class="QSlider" name="freq_slider">
@@ -46,12 +49,9 @@
         <item alignment="Qt::AlignHCenter">
          <widget class="QLabel" name="freq_lbl">
           <property name="text">
-           <string>hz</string>
+           <string>Sampling Frequency</string>
           </property>
          </widget>
-        </item>
-        <item>
-         <widget class="PlotWidget" name="graphicsView_2"/>
         </item>
         <item>
          <widget class="PlotWidget" name="graphicsView_3"/>
@@ -100,16 +100,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>F MAX</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLCDNumber" name="lcdNumber"/>
-        </item>
-        <item>
          <spacer name="verticalSpacer_2">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -136,7 +126,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1039</width>
+     <width>1407</width>
      <height>26</height>
     </rect>
    </property>
@@ -149,6 +139,7 @@
    </widget>
    <addaction name="menuFile"/>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen_file">
    <property name="text">
     <string>Open file</string>
