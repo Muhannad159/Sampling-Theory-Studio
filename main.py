@@ -132,6 +132,14 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             #self.graphicsView_2.plot(sampled_x, sampled_y, pen=None,  symbol='o', symbolBrush='b')
             print(fm)
 
+    #self.graphicsView.plot(self.mixer.sin_time, self.mixer.syntheticSignal, pen=pg.mkPen(color=(255, 0, 0)))
+    #fm = self.mixer.overall_max_frequency
+    #sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, self.mixer.syntheticSignal, 2 * fm)
+    #self.graphicsView.plot(sampled_x, sampled_y, pen=None, symbol='o', symbolBrush='b')
+    #reconstructed_signal = self.interpolation_function(self.mixer.sin_time)  # Use the modified function here
+    #reconstruction_pen = pg.mkPen(color=(0, 0, 255))
+    #self.graphicsView_2.plot(self.mixer.sin_time, reconstructed_signal, pen=pg.mkPen(color=(255, 0, 0)))
+    #print(fm)
     def sample_signal(self,original_x, original_y, f_sample):
         # Calculate the time interval between samples
         time_interval = 1 / f_sample
@@ -150,7 +158,17 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
         
         return new_sample_times, sampled_signal
 
-            
+     # def interpolation_function(self, x):
+     #    # Clip the values to the range [0, 0.75]
+     #    x_new = np.clip(x, 0, 200)
+     #
+     #    # Create an interpolator using sinc interpolation
+     #    interpolator = interp1d(self.mixer.sin_time, self.mixer.syntheticSignal, kind='cubic')
+     #
+     #    # Interpolate the values
+     #    y = interpolator(x_new)
+     #
+     #    return y
 
     def add_signal(self):
          options  = QFileDialog().options()
