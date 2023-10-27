@@ -21,7 +21,7 @@ class MixerApp(QDialog, FORM_CLASS):
 
         self.setupUi(self)
         self.handle_btn()
-        self.sin_time = np.linspace(0, 1, 1000)
+        self.sin_time = np.linspace(0, 3, 4000)
         self.sinusoidals = {}  # Store sine waves as a dictionary
         self.sin_names = []
         self.sin_graphics_view.setBackground('w')
