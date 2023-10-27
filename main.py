@@ -13,6 +13,7 @@ import sys
 import numpy as np
 from os import path
 import scipy.signal
+from scipy.interpolate import interp1d
 
 FORM_CLASS, _ = loadUiType(path.join(path.dirname(__file__), "main.ui"))  # connects the Ui file with the Python file
 
@@ -117,29 +118,40 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 error_pen = pg.mkPen(color="r")
                 self.graphicsView_3.plot(x, error, pen=error_pen)
         else:
+            # # Apply noise to 'y' values
+            # noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in self.mixer.syntheticSignal]
+            # self.graphicsView.plot(self.mixer.sin_time, noisy_y, pen=pg.mkPen(color=(255, 0, 0)))
+            # fm = self.mixer.overall_max_frequency
+            # sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, noisy_y, 2*fm)
+            # self.graphicsView.plot(sampled_x, sampled_y, pen=None,  symbol='o', symbolBrush='b')
+            # reconstructed_signal = np.zeros(len(self.mixer.sin_time))
+            # time_interval = 1 / (2*fm)
+            # for i, t in enumerate(self.mixer.sin_time):
+            #     reconstructed_signal[i] = np.sum(sampled_y * np.sinc((t - sampled_x) / time_interval))
+            # reconstruction_pen = pg.mkPen(color=(0, 0, 255))
+            # self.graphicsView_2.plot(self.mixer.sin_time, reconstructed_signal, pen=pg.mkPen(color=(255, 0, 0)))
+            # #self.graphicsView_2.plot(sampled_x, sampled_y, pen=None,  symbol='o', symbolBrush='b')
+            # print(fm)
+
             # Apply noise to 'y' values
             noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in self.mixer.syntheticSignal]
             self.graphicsView.plot(self.mixer.sin_time, noisy_y, pen=pg.mkPen(color=(255, 0, 0)))
+
             fm = self.mixer.overall_max_frequency
-            sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, noisy_y, 2*fm)
-            self.graphicsView.plot(sampled_x, sampled_y, pen=None,  symbol='o', symbolBrush='b')
-            reconstructed_signal = np.zeros(len(self.mixer.sin_time))
-            time_interval = 1 / (2*fm)
-            for i, t in enumerate(self.mixer.sin_time):
-                reconstructed_signal[i] = np.sum(sampled_y * np.sinc((t - sampled_x) / time_interval))
-            reconstruction_pen = pg.mkPen(color=(0, 0, 255))
-            self.graphicsView_2.plot(self.mixer.sin_time, reconstructed_signal, pen=pg.mkPen(color=(255, 0, 0)))
-            #self.graphicsView_2.plot(sampled_x, sampled_y, pen=None,  symbol='o', symbolBrush='b')
+            sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, noisy_y, 2 * fm)
+            self.graphicsView.plot(sampled_x, sampled_y, pen=None, symbol='o', symbolBrush='b')
+            reconstructed_signal = self.interpolation_function(self.mixer.sin_time, noisy_y)  # Use the modified function here
+            reconstruction_pen = pg.mkPen(color=(255, 0, 0))
+            self.graphicsView_2.plot(self.mixer.sin_time, reconstructed_signal, pen=reconstruction_pen)
+            print(fm)
+            # error
+            error = [abs(original - reconstructed) for original, reconstructed in
+                     zip(noisy_y, reconstructed_signal)]
+            # Plot the error
+            error_pen = pg.mkPen(color="r")
+            self.graphicsView_3.plot(self.mixer.sin_time, error, pen=error_pen)
             print(fm)
 
-    #self.graphicsView.plot(self.mixer.sin_time, self.mixer.syntheticSignal, pen=pg.mkPen(color=(255, 0, 0)))
-    #fm = self.mixer.overall_max_frequency
-    #sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, self.mixer.syntheticSignal, 2 * fm)
-    #self.graphicsView.plot(sampled_x, sampled_y, pen=None, symbol='o', symbolBrush='b')
-    #reconstructed_signal = self.interpolation_function(self.mixer.sin_time)  # Use the modified function here
-    #reconstruction_pen = pg.mkPen(color=(0, 0, 255))
-    #self.graphicsView_2.plot(self.mixer.sin_time, reconstructed_signal, pen=pg.mkPen(color=(255, 0, 0)))
-    #print(fm)
     def sample_signal(self,original_x, original_y, f_sample):
         # Calculate the time interval between samples
         time_interval = 1 / f_sample
@@ -158,17 +170,17 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
         
         return new_sample_times, sampled_signal
 
-     # def interpolation_function(self, x):
-     #    # Clip the values to the range [0, 0.75]
-     #    x_new = np.clip(x, 0, 200)
-     #
-     #    # Create an interpolator using sinc interpolation
-     #    interpolator = interp1d(self.mixer.sin_time, self.mixer.syntheticSignal, kind='cubic')
-     #
-     #    # Interpolate the values
-     #    y = interpolator(x_new)
-     #
-     #    return y
+    def interpolation_function(self, x, y):
+        # Clip the values to the range [0, 0.75]
+        x_new = np.clip(x, 0, 200)
+
+        # Create an interpolator using sinc interpolation
+        interpolator = interp1d(self.mixer.sin_time, y, kind='cubic')
+
+        # Interpolate the values
+        y = interpolator(x_new)
+
+        return y
 
     def add_signal(self):
          options  = QFileDialog().options()

@@ -1,3 +1,6 @@
 
 __pycache__/main.cpython-311.pyc
 *.pyc
+*.pyc
+__pycache__/main.cpython-311.pyc
+__pycache__/mixer.cpython-311.pyc
