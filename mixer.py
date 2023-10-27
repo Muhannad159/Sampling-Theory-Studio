@@ -55,7 +55,6 @@ class MixerApp(QDialog, FORM_CLASS):  # go to the main window in the form_class 
         self.sinusoidals.append(self.sinusoidal)
         self.sin_names.append(self.sin_name)
         self.drawSyntheticSignal()
-        self.lcdNumber.display(self.overall_max_frequency)
 
     def drawSyntheticSignal(self):
         self.syntheticSignal = [0]*self.sin_time

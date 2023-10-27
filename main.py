@@ -33,7 +33,7 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
         self.noise_level = 0  # Initialize the noise level
         self.way_of_plotting_with_add = False
         self.handle_btn()
-        self.fs = 100
+        self.fs = 125
                
 
     def handle_btn(self):
@@ -58,42 +58,37 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             combo_box.addItem(f"{'Signal'} - {key}")
 
     def delete_signal(self):
-        selected_item_text = self.comboBox_2.currentText()  # Get the currently selected item text
-        selected_signal_index = int(selected_item_text.split('-')[-1].strip())  # Extract the signal index
+        if self.way_of_plotting_with_add:
+            selected_item_text = self.comboBox_2.currentText()  # Get the currently selected item text
+            selected_signal_index = int(selected_item_text.split('-')[-1].strip())  # Extract the signal index
 
-        if selected_signal_index in self.signals_data:
-            del self.signals_data[selected_signal_index]
+            if selected_signal_index in self.signals_data:
+                del self.signals_data[selected_signal_index]
 
-            # Remove the selected item from the comboBox_2
-            self.comboBox_2.removeItem(self.comboBox_2.currentIndex())
+                # Remove the selected item from the comboBox_2
+                self.comboBox_2.removeItem(self.comboBox_2.currentIndex())
 
-            # Clear all three graphics views
-            self.graphicsView.clear()
-            self.graphicsView_2.clear()
-            self.graphicsView_3.clear()
+                # Clear all three graphics views
+                self.clear_all()
 
-            # Reorder the items in comboBox_2
-            self.signals_data = self.reindex_dict_keys(self.signals_data)
-            self.refill_combo_from_dict(self.comboBox_2, self.signals_data)
+                # Reorder the items in comboBox_2
+                self.signals_data = self.reindex_dict_keys(self.signals_data)
+                self.refill_combo_from_dict(self.comboBox_2, self.signals_data)
 
             # Replot the remaining signals
             self.plot_graph()
 
     def open_mixer(self):
+        self.way_of_plotting_with_add = False
         from mixer import MixerApp
         self.mixer = MixerApp()
         self.mixer.set_myapp(self )
         self.mixer.show()
 
 
-    
-
-
-
     def printt(self):
         print("hello")
     def plot_graph(self):
-        fmax = 0
         self.graphicsView.clear()
         if self.way_of_plotting_with_add:
             #fmax = 0.5 * f_sample
@@ -121,11 +116,12 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 # Plot the error
                 error_pen = pg.mkPen(color="r")
                 self.graphicsView_3.plot(x, error, pen=error_pen)
-                self.way_of_plotting_with_add = False
         else:
-            self.graphicsView.plot(self.mixer.sin_time, self.mixer.syntheticSignal, pen=pg.mkPen(color=(255, 0, 0)))
+            # Apply noise to 'y' values
+            noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in self.mixer.syntheticSignal]
+            self.graphicsView.plot(self.mixer.sin_time, noisy_y, pen=pg.mkPen(color=(255, 0, 0)))
             fm = self.mixer.overall_max_frequency
-            sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, self.mixer.syntheticSignal, 2*fm)
+            sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, noisy_y, 2*fm)
             self.graphicsView.plot(sampled_x, sampled_y, pen=None,  symbol='o', symbolBrush='b')
             reconstructed_signal = np.zeros(len(self.mixer.sin_time))
             time_interval = 1 / (2*fm)

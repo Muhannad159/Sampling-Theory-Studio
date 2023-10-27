@@ -147,7 +147,7 @@
   </action>
   <action name="mix_signal_btn">
    <property name="text">
-    <string>Mix/Cpmpose signal</string>
+    <string>Mix/Compose signal</string>
    </property>
   </action>
  </widget>
