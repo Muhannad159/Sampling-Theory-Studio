@@ -14,56 +14,54 @@ from main import MainApp
 FORM_CLASS, _ = loadUiType(path.join(path.dirname(__file__), "mixer.ui"))  # connects the Ui file with the Python file
 
 
-class MixerApp(QDialog, FORM_CLASS):  # go to the main window in the form_class file
+class MixerApp(QDialog, FORM_CLASS):
 
-    def __init__(self, parent=None ):  # constructor to initiate the main window  in the design
+    def __init__(self, parent=None):
         super(MixerApp, self).__init__(parent)
-        
+
         self.setupUi(self)
         self.handle_btn()
-        self.sin_time = np.linspace(0, 1, 1000) 
-        self.sinusoidals = [] 
+        self.sin_time = np.linspace(0, 1, 1000)
+        self.sinusoidals = {}  # Store sine waves as a dictionary
         self.sin_names = []
         self.sin_graphics_view.setBackground('w')
-        
-        
-    def handle_btn(self):
-          self.plot_push_btn.clicked.connect(self.construct_signal)
-          self.add_push_btn.clicked.connect(self.add_to_main)
 
+    def handle_btn(self):
+        self.plot_push_btn.clicked.connect(self.construct_signal)
+        self.add_push_btn.clicked.connect(self.add_to_main)
 
     def add_to_main(self):
-        #print("hello")
-        self.mainapp.graphicsView.clear()
-        self.mainapp.graphicsView_2.clear()
-        self.mainapp.graphicsView_3.clear()
-        self.mainapp.plot_graph()  
-        
-        
-     
-    def set_myapp(self , mainapp):
+        self.mainapp.clear_all()
+        self.mainapp.refill_combo_from_dict(self.mainapp.comboBox_2, self.sinusoidals)
+        self.mainapp.plot_graph()
+
+    def set_myapp(self, mainapp):
         self.mainapp = mainapp
-         
 
     def construct_signal(self):
         self.sin_frequency = float(self.signalFrequency.text())
         self.sin_magnitude = float(self.signalMagnitude.text())
         self.sin_phase = float(self.signalPhase.text())
         self.sin_name = self.signalName.text()
-        self.sinusoidal = sine_wave(frequency=self.sin_frequency, samplerate=len(
-            self.sin_time), amplitude=self.sin_magnitude, phaseshift=self.sin_phase)
-        self.sinusoidals.append(self.sinusoidal)
+        self.sinusoidal = sine_wave(frequency=self.sin_frequency, samplerate=len(self.sin_time), amplitude=self.sin_magnitude, phaseshift=self.sin_phase)
+        self.sinusoidals[self.sin_name] = self.sinusoidal  # Store in the dictionary
         self.sin_names.append(self.sin_name)
         self.drawSyntheticSignal()
 
+    def sumSignals(self):
+        if self.sinusoidals:
+            self.syntheticSignal = np.zeros(len(self.sin_time))  # Initialize with zeros
+            for name, sinusoidal in self.sinusoidals.items():
+                self.syntheticSignal += sinusoidal  # Accumulate the sine waves
+        else:
+            self.syntheticSignal = None
+
     def drawSyntheticSignal(self):
-        self.syntheticSignal = [0]*self.sin_time
-        for sinusoidal in self.sinusoidals:
-            self.syntheticSignal += sinusoidal
+        self.sumSignals()
         self.sin_graphics_view.clear()
         self.sin_graphics_view.plot(self.sin_time, self.syntheticSignal, pen=pg.mkPen(color=(255, 0, 0)))
-        self.sample_rate = len(self.sin_time) 
-        self.max_freqs = self.calculate_max_frequencies(self.sinusoidals, self.sample_rate)
+        self.sample_rate = len(self.sin_time)
+        self.max_freqs = self.calculate_max_frequencies(list(self.sinusoidals.values()), self.sample_rate)
         self.overall_max_frequency = max(self.max_freqs)
     #     print(self.overall_max_frequency)
     #     self.sampled_signal = self.sample_signal(self.syntheticSignal, self.overall_max_frequency, self.sample_rate)
