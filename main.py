@@ -79,6 +79,8 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             self.way_of_plotting_with_add = True
          self.plot_graph()
 
+         # Add the following method for sampling and interpolation
+
     def plot_graph(self):
         self.clear_all()
         if self.way_of_plotting_with_add:
@@ -103,10 +105,13 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 self.graphicsView_2.plot(x, reconstructed_signal, pen=reconstruction_pen)
                 error = [abs(original - reconstructed) for original, reconstructed in
                          zip(noisy_y, reconstructed_signal)]
-
-                # Plot the error
+                # Set a threshold for the error
+                error_threshold = 0.1
+                # Create a new list of error values where errors less than the threshold are set to 0
+                error_filtered = [e if e >= error_threshold else 0 for e in error]
+                # Plot the error with the filtered values
                 error_pen = pg.mkPen(color="r")
-                self.graphicsView_3.plot(x, error, pen=error_pen)
+                self.graphicsView_3.plot(x, error_filtered, pen=error_pen)
         else:
             # # Apply noise to 'y' values
             # noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in self.mixer.syntheticSignal]
@@ -134,13 +139,16 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 reconstructed_signal = self.interpolation_function(self.mixer.sin_time, noisy_y)  # Use the modified function here
                 reconstruction_pen = pg.mkPen(color=(255, 0, 0))
                 self.graphicsView_2.plot(self.mixer.sin_time, reconstructed_signal, pen=reconstruction_pen)
-                print(fm)
                 # error
                 error = [abs(original - reconstructed) for original, reconstructed in
                          zip(noisy_y, reconstructed_signal)]
-                # Plot the error
+                # Set a threshold for the error
+                error_threshold = 0.1
+                # Create a new list of error values where errors less than the threshold are set to 0
+                error_filtered = [e if e >= error_threshold else 0 for e in error]
+                # Plot the error with the filtered values
                 error_pen = pg.mkPen(color="r")
-                self.graphicsView_3.plot(self.mixer.sin_time, error, pen=error_pen)
+                self.graphicsView_3.plot(self.mixer.sin_time, error_filtered, pen=error_pen)
 
     def sample_signal(self, original_x, original_y, f_sample):
         # Calculate the time interval between samples

@@ -73,7 +73,7 @@ class MixerApp(QDialog, FORM_CLASS):
                                     phaseshift=sin_phase)
         self.sinusoidals[name_input] = self.sinusoidal
         self.sin_names.append(name_input)
-        self.drawSyntheticSignal()
+        self.drawSyntheticSignal(self.sin_graphics_view)
 
     def sumSignals(self):
         if self.sinusoidals:
@@ -83,10 +83,10 @@ class MixerApp(QDialog, FORM_CLASS):
         else:
             self.syntheticSignal = None
 
-    def drawSyntheticSignal(self):
+    def drawSyntheticSignal(self, graphicsView):
         self.sumSignals()
-        self.sin_graphics_view.clear()
-        self.sin_graphics_view.plot(self.sin_time, self.syntheticSignal, pen=pg.mkPen(color=(255, 0, 0)))
+        graphicsView.clear()
+        graphicsView.plot(self.sin_time, self.syntheticSignal, pen=pg.mkPen(color=(255, 0, 0)))
         self.sample_rate = len(self.sin_time)
         self.max_freqs = self.calculate_max_frequencies(list(self.sinusoidals.values()), self.sample_rate)
         self.overall_max_frequency = max(self.max_freqs)
