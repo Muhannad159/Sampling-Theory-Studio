@@ -104,29 +104,17 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 # Apply noise to 'y' values
                 noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in y]
                 # Set the sampling rate
+
                 f_sample = 125
                 time_interval = 1 / f_sample
-                # Create a new array of sample times based on the new time_interval
-                new_sample_times = np.arange(0, max(x), time_interval)
-                # Initialize an array for the interpolated signal
-                interpolated_signal = np.zeros(len(new_sample_times))
-                # Perform sinc interpolation
-                for i, t in enumerate(new_sample_times):
-                    # Calculate the sinc-interpolated value at time t
-                    interpolated_signal[i] = np.sum(noisy_y * np.sinc((t - x) / time_interval))
-                # Sample the interpolated signal
-                sampled_x = new_sample_times
-                sampled_y = interpolated_signal
-                # Plot the sampled points
+                sampled_x, sampled_y = self.sample_signal(x, noisy_y, f_sample)
+                reconstructed_signal = np.zeros(len(x))
+                for i, t in enumerate(x):
+                    reconstructed_signal[i] = np.sum(sampled_y * np.sinc((t - sampled_x) / time_interval))
+
                 self.graphicsView.plot(sampled_x, sampled_y, pen="r", symbol='o', symbolBrush='b')
-                # Perform reconstruction (original signal, not sampled)
-                reconstructed_signal = np.zeros_like(x)
-                for n, sample in enumerate(sampled_y):
-                    reconstructed_signal += sample * np.sinc((x - sampled_x[n]) / time_interval)
-                # Plot the reconstructed signal
                 reconstruction_pen = pg.mkPen(color=(0, 0, 255))
                 self.graphicsView_2.plot(x, reconstructed_signal, pen=reconstruction_pen)
-
                 error = [abs(original - reconstructed) for original, reconstructed in
                          zip(noisy_y, reconstructed_signal)]
 
@@ -137,7 +125,35 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
         else:
             self.graphicsView.plot(self.mixer.sin_time, self.mixer.syntheticSignal, pen=pg.mkPen(color=(255, 0, 0)))
             fm = self.mixer.overall_max_frequency
+            sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, self.mixer.syntheticSignal, 2*fm)
+            self.graphicsView.plot(sampled_x, sampled_y, pen=None,  symbol='o', symbolBrush='b')
+            reconstructed_signal = np.zeros(len(self.mixer.sin_time))
+            time_interval = 1 / (2*fm)
+            for i, t in enumerate(self.mixer.sin_time):
+                reconstructed_signal[i] = np.sum(sampled_y * np.sinc((t - sampled_x) / time_interval))
+            reconstruction_pen = pg.mkPen(color=(0, 0, 255))
+            self.graphicsView_2.plot(self.mixer.sin_time, reconstructed_signal, pen=pg.mkPen(color=(255, 0, 0)))
+            #self.graphicsView_2.plot(sampled_x, sampled_y, pen=None,  symbol='o', symbolBrush='b')
             print(fm)
+
+    def sample_signal(self,original_x, original_y, f_sample):
+        # Calculate the time interval between samples
+        time_interval = 1 / f_sample
+        
+        # Create a new array of sample times based on the time interval
+        new_sample_times = np.arange(0, max(original_x), time_interval)
+        
+        # Initialize an array for the sampled signal
+        sampled_signal = np.zeros(len(new_sample_times))
+        
+        # Sample the signal at the specified times
+        for i, t in enumerate(new_sample_times):
+            # Find the closest original sample to the current time
+            closest_sample_idx = np.argmin(np.abs(original_x - t))
+            sampled_signal[i] = original_y[closest_sample_idx]
+        
+        return new_sample_times, sampled_signal
+
             
 
     def add_signal(self):

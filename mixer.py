@@ -21,7 +21,7 @@ class MixerApp(QDialog, FORM_CLASS):  # go to the main window in the form_class 
         
         self.setupUi(self)
         self.handle_btn()
-        self.sin_time = np.linspace(0, 4, 1000) 
+        self.sin_time = np.linspace(0, 1, 1000) 
         self.sinusoidals = [] 
         self.sin_names = []
         self.sin_graphics_view.setBackground('w')
