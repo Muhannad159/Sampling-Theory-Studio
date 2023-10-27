@@ -39,13 +39,40 @@ class MixerApp(QDialog, FORM_CLASS):
         self.mainapp = mainapp
 
     def construct_signal(self):
-        self.sin_frequency = float(self.signalFrequency.text())
-        self.sin_magnitude = float(self.signalMagnitude.text())
-        self.sin_phase = float(self.signalPhase.text())
-        self.sin_name = self.signalName.text()
-        self.sinusoidal = sine_wave(frequency=self.sin_frequency, samplerate=len(self.sin_time), amplitude=self.sin_magnitude, phaseshift=self.sin_phase)
-        self.sinusoidals[self.sin_name] = self.sinusoidal  # Store in the dictionary
-        self.sin_names.append(self.sin_name)
+        # Get input values from QLineEdit widgets
+        freq_input = self.signalFrequency.text()
+        magnitude_input = self.signalMagnitude.text()
+        phase_input = self.signalPhase.text()
+        name_input = self.signalName.text()
+
+        # Validate the frequency input
+        try:
+            sin_frequency = float(freq_input)
+            if sin_frequency <= 0:
+                QMessageBox.warning(self, 'Invalid Input', 'Frequency must be a positive number.')
+                return
+        except ValueError:
+            QMessageBox.warning(self, 'Invalid Input', 'Frequency must be a valid number.')
+            return
+
+        # Validate the name input
+        if name_input in self.sinusoidals:
+            QMessageBox.warning(self, 'Invalid Input', 'Name already exists. Please choose a different name.')
+            return
+
+        # Validate magnitude and phase inputs as needed
+        try:
+            sin_magnitude = float(magnitude_input)
+            sin_phase = float(phase_input)
+        except ValueError:
+            QMessageBox.warning(self, 'Invalid Input', 'Magnitude and Phase must be valid numbers.')
+            return
+
+        # If all validations pass, create the sine wave and add it to the dictionary
+        self.sinusoidal = sine_wave(frequency=sin_frequency, samplerate=len(self.sin_time), amplitude=sin_magnitude,
+                                    phaseshift=sin_phase)
+        self.sinusoidals[name_input] = self.sinusoidal
+        self.sin_names.append(name_input)
         self.drawSyntheticSignal()
 
     def sumSignals(self):
