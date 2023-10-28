@@ -251,6 +251,7 @@ class MainApp(QMainWindow, FORM_CLASS):
         self.fs = value
         self.freq_slider.setSingleStep(125)  # Set step size
         self.freq_lbl.setText(f"Sampling frequency is {str(self.fs)}")
+        self.error_threshold = 0.1  # Define your error threshold value
         if self.way_of_plotting_with_add:
             if self.fs > 125:
                 self.error_threshold = 0.5  # Define your error threshold value
@@ -258,7 +259,7 @@ class MainApp(QMainWindow, FORM_CLASS):
             print(self.fs)
             print(self.mixer.overall_max_frequency * 2)
             if self.fs >= self.mixer.overall_max_frequency * 2:
-                self.error_threshold = 4  # Define your error threshold value
+                self.error_threshold = 2.5  # Define your error threshold value
         self.plot_graph()
 
         # Update to set the slider position and value to 125 if value is 125
