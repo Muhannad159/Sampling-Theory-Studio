@@ -24,10 +24,9 @@ font-family: 'Roboto';
 font-style: normal;
 font-weight: 400;
 font-size: 12px;
-line-height: 20px;
+
 /* identical to box height, or 143% */
 
-letter-spacing: 0.25px;
 
 /* 00. On Surface / High Emphasis */
 
@@ -82,8 +81,12 @@ border-radius: 5px;
         <item alignment="Qt::AlignHCenter">
          <widget class="QLabel" name="freq_lbl">
           <property name="styleSheet">
-           <string notr="true">border: 1px solid rgba(0, 0, 0, 0.20);
-border-radius: 5px;</string>
+           <string notr="true">background-color: rgb(238, 238, 238); 
+    
+color: black;
+border: 1px solid rgba(0, 0, 0, 0.20);
+border-radius: 5px;
+</string>
           </property>
           <property name="text">
            <string>Sampling Frequency</string>
