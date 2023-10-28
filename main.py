@@ -1,4 +1,3 @@
-from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -14,6 +13,7 @@ import numpy as np
 from os import path
 import scipy.signal
 from scipy.interpolate import interp1d
+from scipy.signal import find_peaks
 
 FORM_CLASS, _ = loadUiType(path.join(path.dirname(__file__), "main.ui"))  # connects the Ui file with the Python file
 
@@ -29,13 +29,10 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
         self.signals_data = {}  # Define signals_data as a class attribute
         self.count_signals = 0
         self.file_names = []
-        self.noise_slider.setOrientation(Qt.Horizontal)
         self.noise_slider.setRange(0, 100)  # Set the range of the noise level as per your requirements
         self.noise_level = 0  # Initialize the noise level
         self.way_of_plotting_with_add = True
         self.handle_btn()
-        self.fs = 125
-               
 
     def handle_btn(self):
         self.actionOpen_file.triggered.connect(self.add_signal)
@@ -77,15 +74,16 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             self.signals_data[self.count_signals] = [time_values, v_values, 'Red', f"{'Signal'} - {self.count_signals}", file_name]
             self.comboBox_2.addItem(f"{'Signal'} - {self.count_signals}")
             self.way_of_plotting_with_add = True
+         self.fs = 125
+         self.freq_slider.setRange(int(self.fs / 2), int(self.fs * 3 / 2))
+         self.freq_slider.setSliderPosition(125)
+         self.freq_slider.setValue(self.fs)  # Set the value to 125
          self.plot_graph()
 
-         # Add the following method for sampling and interpolation
 
     def plot_graph(self):
-        fmax = 0
         self.graphicsView.clear()
         if self.way_of_plotting_with_add:
-            # fmax = 0.5 * f_sample
             for value in self.signals_data.values():
                 pen = pg.mkPen(color=(255, 0, 0))
                 x = value[0]
@@ -94,9 +92,8 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in y]
                 # Set the sampling rate
 
-                f_sample = 125
-                time_interval = 1 / f_sample
-                sampled_x, sampled_y = self.sample_signal(x, noisy_y, f_sample)
+                time_interval = 1 / self.fs
+                sampled_x, sampled_y = self.sample_signal(x, noisy_y, self.fs)
                 reconstructed_signal = np.zeros(len(x))
                 for i, t in enumerate(x):
                     reconstructed_signal[i] = np.sum(sampled_y * np.sinc((t - sampled_x) / time_interval))
@@ -104,40 +101,48 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 self.graphicsView.plot(sampled_x, sampled_y, pen="r", symbol='o', symbolBrush='b')
                 reconstruction_pen = pg.mkPen(color=(0, 0, 255))
                 self.graphicsView_2.plot(x, reconstructed_signal, pen=reconstruction_pen)
+
+
+                error_threshold = 0.1  # Define your error threshold valu
                 error = [abs(original - reconstructed) for original, reconstructed in
                          zip(noisy_y, reconstructed_signal)]
-
-                # Plot the error
+                # Filter error values above the threshold
+                error_above_threshold = [err if err > error_threshold else 0 for err in error]
+                # Plot the error above the threshold
                 error_pen = pg.mkPen(color="r")
-                self.graphicsView_3.plot(x, error, pen=error_pen)
-                self.way_of_plotting_with_add = False
+                self.graphicsView_3.plot(x, error_above_threshold, pen=error_pen)
+
         else:
-            self.graphicsView.plot(self.mixer.sin_time, self.mixer.syntheticSignal, pen=pg.mkPen(color=(255, 0, 0)))
-            fm = self.mixer.overall_max_frequency
-            sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, self.mixer.syntheticSignal, 2 * fm)
+            # Apply noise to 'y' values
+            noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in self.mixer.syntheticSignal]
+            self.graphicsView.plot(self.mixer.sin_time, noisy_y, pen=pg.mkPen(color=(255, 0, 0)))
+            sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, noisy_y, self.fs)
             # sampled_x = list(sampled_x)
             # sampled_y = list(sampled_y)
             # sampled_x.append(self.mixer.sin_time[-1])
             # sampled_y.append(self.mixer.syntheticSignal[-1])
             # sampled_x.insert(0, self.mixer.sin_time[0])
             # sampled_y.insert(0, self.mixer.syntheticSignal[0])
-            print(len(self.mixer.sin_time))
-            print(len(self.mixer.syntheticSignal))
+            # print(len(self.mixer.sin_time))
+            # print(len(self.mixer.syntheticSignal))
             self.graphicsView.plot(sampled_x, sampled_y, pen=None, symbol='o', symbolBrush='b')
 
             self.graphicsView_2.plot(sampled_x, sampled_y, pen=None, symbol='o', symbolBrush='b')
 
-            reconstructed_signal = self.sinc_interpolation(sampled_x, sampled_y, 2 * fm, self.mixer.sin_time)
+            reconstructed_signal = self.sinc_interpolation(sampled_x, sampled_y, self.fs, self.mixer.sin_time)
 
-            print(len(reconstructed_signal))
-            print(len(self.mixer.sin_time))
+            # print(len(reconstructed_signal))
+            # print(len(self.mixer.sin_time))
             self.graphicsView_2.plot(self.mixer.sin_time, reconstructed_signal, pen=pg.mkPen(color=(255, 0, 0)))
-            error = []
-            for (i, j) in zip(self.mixer.syntheticSignal, reconstructed_signal):
-                error.append(abs(i - j))
-            self.graphicsView_3.plot(self.mixer.sin_time, error, pen=pg.mkPen(color=(255, 0, 0)))
-            self.graphicsView_3.setYRange(-5, 5)
-            print(fm)
+            error_threshold = 0.1  # Define your error threshold valu
+            error = [abs(original - reconstructed) for original, reconstructed in
+                     zip(noisy_y, reconstructed_signal)]
+            # Filter error values above the threshold
+            error_above_threshold = [err if err > error_threshold else 0 for err in error]
+            # Plot the error above the threshold
+            error_pen = pg.mkPen(color="r")
+            self.graphicsView_3.plot(self.mixer.sin_time, error_above_threshold, pen=error_pen)
+            # print(fm)
 
     def sinc_interpolation(self, sampled_x, sampled_y, f_sample, new_time_points):
         """
@@ -178,6 +183,7 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
 
         return new_sample_times, sampled_signal
 
+
     def clear_all(self):
         self.graphicsView.clear()
         self.graphicsView_2.clear()
@@ -185,15 +191,24 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
 
     def update_noise_level(self, value):
         self.clear_all()
-        self.noise_level = value / 100
+        if self.way_of_plotting_with_add:
+            self.noise_level = value / 100
+        else:
+            self.noise_level = value / 10
         self.nsr_lbl.setText(f"Noise to Signal Ratio {str(self.noise_level)}")
         self.plot_graph()
 
     def update_fs(self, value):
-         self.fs = value*10
-         self.freq_lbl.setText(f"Sampling frequency is {str(self.fs)}")
-         self.clear_all()
-         self.plot_graph()
+        self.fs = value
+        self.freq_lbl.setText(f"Sampling frequency is {str(self.fs)}")
+        self.clear_all()
+        self.plot_graph()
+
+        # Update to set the slider position and value to 125 if value is 125
+        if value == 125:
+            self.freq_slider.setSliderPosition(125)
+            self.freq_slider.setValue(125)
+
 
     def reindex_dict_keys(self, dictionary):
         return {i: value for i, (key, value) in enumerate(dictionary.items(), start=1)}

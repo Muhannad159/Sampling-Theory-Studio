@@ -33,6 +33,10 @@ class MixerApp(QDialog, FORM_CLASS):
     def add_to_main(self):
         self.mainapp.clear_all()
         self.mainapp.refill_combo_from_dict(self.mainapp.comboBox_2, self.sinusoidals)
+        self.mainapp.fs = 2 * self.overall_max_frequency
+        self.mainapp.freq_slider.setRange(int(self.mainapp.fs / 2), int(self.mainapp.fs * 3 / 2))
+        self.mainapp.freq_slider.setSliderPosition(int(2 * self.overall_max_frequency))
+        self.mainapp.freq_slider.setValue(int(self.mainapp.fs))  # Set the value to 125
         self.mainapp.plot_graph()
 
     def set_myapp(self, mainapp):
@@ -55,11 +59,6 @@ class MixerApp(QDialog, FORM_CLASS):
             QMessageBox.warning(self, 'Invalid Input', 'Frequency must be a valid number.')
             return
 
-        # Validate the name input
-        if name_input in self.sinusoidals:
-            QMessageBox.warning(self, 'Invalid Input', 'Name already exists. Please choose a different name.')
-            return
-
         # Validate magnitude and phase inputs as needed
         try:
             sin_magnitude = float(magnitude_input)
@@ -68,7 +67,18 @@ class MixerApp(QDialog, FORM_CLASS):
             QMessageBox.warning(self, 'Invalid Input', 'Magnitude and Phase must be valid numbers.')
             return
 
-        # If all validations pass, create the sine wave and add it to the dictionary
+        # If no name is entered, construct a default name based on specs
+        if not name_input:
+            name_input = f"Freq_{sin_frequency}_Mag_{sin_magnitude}_Phase_{sin_phase}"
+
+        # If the name already exists, generate a unique name
+        suffix = 1
+        base_name = name_input
+        while name_input in self.sinusoidals:
+            name_input = f"{base_name}_{suffix}"
+            suffix += 1
+
+        # Create the sine wave and add it to the dictionary
         self.sinusoidal = sine_wave(frequency=sin_frequency, samplerate=len(self.sin_time), amplitude=sin_magnitude,
                                     phaseshift=sin_phase)
         self.sinusoidals[name_input] = self.sinusoidal
