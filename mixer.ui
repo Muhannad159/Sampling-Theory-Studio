@@ -7,11 +7,34 @@
     <x>0</x>
     <y>0</y>
     <width>521</width>
-    <height>178</height>
+    <height>223</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Mixer/Composer</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">color: #000;
+padding: 6px 12px;
+border: 1px solid rgba(0, 0, 0, 0.20);
+border-radius: 5px;
+
+/* Body 2 */
+
+font-family: 'Roboto';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 20px;
+/* identical to box height, or 143% */
+
+letter-spacing: 0.25px;
+
+/* 00. On Surface / High Emphasis */
+
+/*color: rgba(0, 0, 0, 0.50);*/
+color: black;
+</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
@@ -69,6 +92,18 @@
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
           <widget class="QPushButton" name="plot_push_btn">
+           <property name="styleSheet">
+            <string notr="true">QPushButton {background-color:white;}
+::hover {
+    background-color: rgb(238, 238, 238); 
+     border: 1px solid rgb(10, 10, 10);
+    
+    color: black; 
+}
+
+
+</string>
+           </property>
            <property name="text">
             <string>Plot</string>
            </property>
@@ -76,6 +111,15 @@
          </item>
          <item>
           <widget class="QPushButton" name="add_push_btn">
+           <property name="styleSheet">
+            <string notr="true">QPushButton {background-color:white;}
+::hover {
+    background-color: rgb(238, 238, 238); 
+     border: 1px solid rgb(10, 10, 10);
+    
+    color: black; 
+}</string>
+           </property>
            <property name="text">
             <string>ADD</string>
            </property>
