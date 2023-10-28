@@ -93,7 +93,7 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 # Set the sampling rate
 
                 time_interval = 1 / self.fs
-                sampled_x, sampled_y = self.sample_signal(x, noisy_y, self.fs)
+                sampled_x, sampled_y = self.sample_signal(x, noisy_y, self.fs , 0)
                 reconstructed_signal = np.zeros(len(x))
                 for i, t in enumerate(x):
                     reconstructed_signal[i] = np.sum(sampled_y * np.sinc((t - sampled_x) / time_interval))
@@ -116,7 +116,7 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             # Apply noise to 'y' values
             noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in self.mixer.syntheticSignal]
             self.graphicsView.plot(self.mixer.sin_time, noisy_y, pen=pg.mkPen(color=(255, 0, 0)))
-            sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, noisy_y, self.fs)
+            sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, noisy_y, self.fs, 0.005)
             # sampled_x = list(sampled_x)
             # sampled_y = list(sampled_y)
             # sampled_x.append(self.mixer.sin_time[-1])
@@ -142,6 +142,7 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             # Plot the error above the threshold
             error_pen = pg.mkPen(color="r")
             self.graphicsView_3.plot(self.mixer.sin_time, error_above_threshold, pen=error_pen)
+            self.graphicsView_3.setYRange(-6, 6)
             # print(fm)
 
     def sinc_interpolation(self, sampled_x, sampled_y, f_sample, new_time_points):
@@ -165,12 +166,12 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
 
         return reconstructed_signal
 
-    def sample_signal(self, original_x, original_y, f_sample):
+    def sample_signal(self, original_x, original_y, f_sample , start):
         # Calculate the time interval between samples
         time_interval = 1 / f_sample
 
         # Create a new array of sample times based on the time interval
-        new_sample_times = np.arange(0.05, max(original_x), time_interval)
+        new_sample_times = np.arange(start, max(original_x), time_interval)
 
         # Initialize an array for the sampled signal
         sampled_signal = np.zeros(len(new_sample_times))
