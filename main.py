@@ -26,9 +26,11 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
         self.graphicsView.setBackground('w')
         self.graphicsView_2.setBackground('w')
         self.graphicsView_3.setBackground('w')
+        self.graphicsView.setLabel('bottom', 'time')
+        self.graphicsView_2.setLabel('bottom', 'time')
+        self.graphicsView_3.setLabel('bottom', 'time')
         self.signals_data = {}  # Define signals_data as a class attribute
         self.count_signals = 0
-        self.file_names = []
         self.noise_slider.setRange(0, 100)  # Set the range of the noise level as per your requirements
         self.noise_level = 0  # Initialize the noise level
         self.way_of_plotting_with_add = True
@@ -60,7 +62,6 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 self.delete_signal()
             self.count_signals += 1
             file_name = file_path.split("/")[-1]
-            self.file_names.append(file_name)
             signal_data = pd.read_csv(file_name)
             time_column = signal_data.iloc[:1000, 0]
             values_column = signal_data.iloc[:1000, -1]
@@ -71,7 +72,7 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             self.number_of_points = len(time_values)
 
             # Making a new item in the dictionary, the new signal is given a key, and the values is given according to its data
-            self.signals_data[self.count_signals] = [time_values, v_values, 'Red', f"{'Signal'} - {self.count_signals}", file_name]
+            self.signals_data[self.count_signals] = [time_values, v_values, 'Red', f"{'Signal'} - {self.count_signals}"]
             self.comboBox_2.addItem(f"{'Signal'} - {self.count_signals}")
             self.way_of_plotting_with_add = True
          self.fs = 125
@@ -91,7 +92,6 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
                 # Apply noise to 'y' values
                 noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in y]
                 # Set the sampling rate
-
                 time_interval = 1 / self.fs
                 sampled_x, sampled_y = self.sample_signal(x, noisy_y, self.fs , 0)
                 reconstructed_signal = np.zeros(len(x))
@@ -117,22 +117,9 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in self.mixer.syntheticSignal]
             self.graphicsView.plot(self.mixer.sin_time, noisy_y, pen=pg.mkPen(color=(255, 0, 0)))
             sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, noisy_y, self.fs, 0.005)
-            # sampled_x = list(sampled_x)
-            # sampled_y = list(sampled_y)
-            # sampled_x.append(self.mixer.sin_time[-1])
-            # sampled_y.append(self.mixer.syntheticSignal[-1])
-            # sampled_x.insert(0, self.mixer.sin_time[0])
-            # sampled_y.insert(0, self.mixer.syntheticSignal[0])
-            # print(len(self.mixer.sin_time))
-            # print(len(self.mixer.syntheticSignal))
             self.graphicsView.plot(sampled_x, sampled_y, pen=None, symbol='o', symbolBrush='b')
-
             self.graphicsView_2.plot(sampled_x, sampled_y, pen=None, symbol='o', symbolBrush='b')
-
             reconstructed_signal = self.sinc_interpolation(sampled_x, sampled_y, self.fs, self.mixer.sin_time)
-
-            # print(len(reconstructed_signal))
-            # print(len(self.mixer.sin_time))
             self.graphicsView_2.plot(self.mixer.sin_time, reconstructed_signal, pen=pg.mkPen(color=(255, 0, 0)))
             error_threshold = 0.1  # Define your error threshold valu
             error = [abs(original - reconstructed) for original, reconstructed in
@@ -143,33 +130,12 @@ class MainApp(QMainWindow, FORM_CLASS):  # go to the main window in the form_cla
             error_pen = pg.mkPen(color="r")
             self.graphicsView_3.plot(self.mixer.sin_time, error_above_threshold, pen=error_pen)
             self.graphicsView_3.setYRange(-6, 6)
-            # print(fm)
+           
 
-    def sinc_interpolation(self, sampled_x, sampled_y, f_sample, new_time_points):
-        """
-        Reconstruct a signal using sinc interpolation.
-
-        Args:
-            sampled_x (array-like): The time (or position) values at which the signal is sampled.
-            sampled_y (array-like): The corresponding sampled signal values.
-            f_sample (float): The sampling frequency (or sampling rate).
-            new_time_points (array-like): The time points at which you want to reconstruct the signal.
-
-        Returns:
-            np.array: The reconstructed signal values at new_time_points.
-        """
-        time_interval = 1 / f_sample
-        reconstructed_signal = np.zeros(len(new_time_points))
-
-        for n, sample in enumerate(sampled_y):
-            reconstructed_signal += sample * np.sinc((new_time_points - sampled_x[n]) / time_interval)
-
-        return reconstructed_signal
-
+    
     def sample_signal(self, original_x, original_y, f_sample , start):
         # Calculate the time interval between samples
         time_interval = 1 / f_sample
-
         # Create a new array of sample times based on the time interval
         new_sample_times = np.arange(start, max(original_x), time_interval)
 

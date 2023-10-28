@@ -100,16 +100,6 @@ class MixerApp(QDialog, FORM_CLASS):
         self.sample_rate = len(self.sin_time)
         self.max_freqs = self.calculate_max_frequencies(list(self.sinusoidals.values()), self.sample_rate)
         self.overall_max_frequency = max(self.max_freqs)
-    #     print(self.overall_max_frequency)
-    #     self.sampled_signal = self.sample_signal(self.syntheticSignal, self.overall_max_frequency, self.sample_rate)
-    #     if self.sampled_signal is not None:
-    # # Plot the sampled points as blue dots
-    #         self.sin_graphics_view.plot(self.sin_time[::len(self.sin_time) // len(self.sampled_signal)],
-    #                            self.sampled_signal, pen=None, symbol='o', symbolPen=None, symbolBrush=(0, 0, 255))
-
-
-
-
 
     def calculate_max_frequency(self, sinusoidal, sample_rate):
     # Step 1: Compute the Fourier Transform of the individual sinusoidal component.
@@ -133,41 +123,12 @@ class MixerApp(QDialog, FORM_CLASS):
         # Step 6: Return the maximum frequency.
         return max_frequency
 
-
-
     def calculate_max_frequencies(self, sinusoidals, sample_rate):
         max_frequencies = []
         for sinusoidal in sinusoidals:
             max_freq = self.calculate_max_frequency(sinusoidal, sample_rate)
             max_frequencies.append(max_freq)
         return max_frequencies
-
-
-    # def sample_signal(self, signal, max_frequency, sample_rate):
-    #     # Calculate the Nyquist frequency based on the max frequency
-    #     nyquist_frequency = max_frequency * 2
-
-    #     # Calculate the number of samples per period based on the Nyquist frequency
-    #     samples_per_period = int(sample_rate / nyquist_frequency)
-
-    #     # Determine the number of periods in the signal
-    #     num_periods = len(signal) // samples_per_period
-
-    #     # Calculate the step size for sampling
-    #     step_size = len(signal) // num_periods
-
-    #     # Sample the signal at the determined step size
-    #     sampled_signal = signal[::step_size]
-
-    #     return sampled_signal
-
-
-
-
-       
-
-
-
  
 
 def main():  # method to start app
