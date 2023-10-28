@@ -79,14 +79,14 @@ class MainApp(QMainWindow, FORM_CLASS):
         self.mixer.show()  # Display the mixer window
 
     def add_signal(self):
-         """
-         Load a CSV signal file, add it to the application's data, and plot it.
-         """
-         options  = QFileDialog().options()
-         options |= QFileDialog.ReadOnly
-         file_path, _ = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (.csv);;All Files ()",
+        """
+        Load a CSV signal file, add it to the application's data, and plot it.
+        """
+        options = QFileDialog().options()
+        options |= QFileDialog.ReadOnly
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv);;All Files (*)",
                                                    options=options)
-         if file_path:
+        if file_path:
             if self.signals_data or not self.way_of_plotting_with_add:
                 self.delete_signal()
             self.count_signals += 1
@@ -96,7 +96,7 @@ class MainApp(QMainWindow, FORM_CLASS):
             values_column = signal_data.iloc[:1000, -1]
             time_values = time_column.tolist()
             v_values = values_column.tolist()
-            self.first_element_of_time = time_values[1]-time_values[0]
+            self.first_element_of_time = time_values[1] - time_values[0]
             self.max_x_1 = max(time_values)
             self.number_of_points = len(time_values)
 
@@ -104,11 +104,11 @@ class MainApp(QMainWindow, FORM_CLASS):
             self.signals_data[self.count_signals] = [time_values, v_values, 'Red', f"{'Signal'} - {self.count_signals}"]
             self.comboBox_2.addItem(f"{'Signal'} - {self.count_signals}")
             self.way_of_plotting_with_add = True
-         self.fs = 125
-         self.freq_slider.setRange(int(self.fs / 4), int(self.fs * 4))
-         self.freq_slider.setSliderPosition(125)
-         self.freq_slider.setValue(self.fs)  # Set the value to 125
-         self.plot_graph()
+        self.fs = 125
+        self.freq_slider.setRange(int(self.fs / 4), int(self.fs * 4))
+        self.freq_slider.setSliderPosition(125)
+        self.freq_slider.setValue(self.fs)  # Set the value to 125
+        self.plot_graph()
 
     def plot_graph(self):
         """
