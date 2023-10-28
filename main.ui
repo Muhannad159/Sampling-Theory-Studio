@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1100</width>
-    <height>544</height>
+    <height>550</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,7 @@
   <property name="styleSheet">
    <string notr="true">color: #000;
 padding: 6px 12px;
-border: 1px solid rgba(0, 0, 0, 0.20);
-border-radius: 5px;
+
 
 /* Body 2 */
 
@@ -58,6 +57,8 @@ color: black;
            <string notr="true">background-color: rgb(238, 238, 238); 
     
 color: black;
+border: 1px solid rgba(0, 0, 0, 0.20);
+border-radius: 5px;
 </string>
           </property>
           <property name="text">
@@ -80,6 +81,10 @@ color: black;
         </item>
         <item alignment="Qt::AlignHCenter">
          <widget class="QLabel" name="freq_lbl">
+          <property name="styleSheet">
+           <string notr="true">border: 1px solid rgba(0, 0, 0, 0.20);
+border-radius: 5px;</string>
+          </property>
           <property name="text">
            <string>Sampling Frequency</string>
           </property>
@@ -106,7 +111,12 @@ color: black;
          </spacer>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox_2"/>
+         <widget class="QComboBox" name="comboBox_2">
+          <property name="styleSheet">
+           <string notr="true">border: 1px solid rgba(0, 0, 0, 0.20);
+border-radius: 5px;</string>
+          </property>
+         </widget>
         </item>
         <item>
          <spacer name="verticalSpacer">
@@ -127,7 +137,9 @@ color: black;
         <item>
          <widget class="QPushButton" name="delete_btn">
           <property name="styleSheet">
-           <string notr="true">QPushButton {background-color:white;}
+           <string notr="true">QPushButton {background-color:white;
+border: 1px solid rgba(0, 0, 0, 0.20);
+border-radius: 5px;}
 ::hover {
     background-color: rgb(238, 238, 238); 
      border: 1px solid rgb(10, 10, 10);
@@ -168,7 +180,7 @@ color: black;
      <x>0</x>
      <y>0</y>
      <width>1100</width>
-     <height>34</height>
+     <height>32</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
