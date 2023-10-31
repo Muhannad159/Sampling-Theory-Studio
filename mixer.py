@@ -57,7 +57,7 @@ class MixerApp(QDialog, FORM_CLASS):
 
         # Calculate the sample rate and set frequency slider values
         self.mainapp.fs = 2 * self.overall_max_frequency
-        self.mainapp.freq_slider.setRange(int(self.mainapp.fs / 4), int(self.mainapp.fs * 4))
+        self.mainapp.freq_slider.setRange(int(self.mainapp.fs / 8), int(self.mainapp.fs * 4))
         self.mainapp.freq_slider.setSliderPosition(int(2 * self.overall_max_frequency))
         self.mainapp.freq_slider.setValue(int(self.mainapp.fs))
 
