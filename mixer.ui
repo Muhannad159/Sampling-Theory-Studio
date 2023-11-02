@@ -91,7 +91,7 @@ color: black;
        <item row="4" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
-          <widget class="QPushButton" name="plot_push_btn">
+          <widget class="QPushButton" name="add_push_btn">
            <property name="styleSheet">
             <string notr="true">QPushButton {background-color:white;}
 ::hover {
@@ -105,12 +105,12 @@ color: black;
 </string>
            </property>
            <property name="text">
-            <string>Plot</string>
+            <string>ADD</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="add_push_btn">
+          <widget class="QPushButton" name="send_push_btn">
            <property name="styleSheet">
             <string notr="true">QPushButton {background-color:white;}
 ::hover {
@@ -121,7 +121,7 @@ color: black;
 }</string>
            </property>
            <property name="text">
-            <string>ADD</string>
+            <string>Send</string>
            </property>
           </widget>
          </item>

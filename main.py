@@ -1,3 +1,5 @@
+
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -35,9 +37,9 @@ class MainApp(QMainWindow, FORM_CLASS):
         # Initialize data and settings
         self.signals_data = {}  # Dictionary to store signal data
         self.count_signals = 0  # Counter for the number of signals added
+        self.comboBox_fmax.setCurrentIndex(1)
         self.noise_slider.setRange(0, 100)  # Set the noise level range
         self.noise_level = 0  # Initialize the noise level
-        self.freq_slider.setSingleStep(125)
         self.error_threshold = 0.1  # Define your error threshold value
         self.way_of_plotting_with_add = True  # Flag to determine the signal source
         self.handle_btn()  # Connect UI elements to their handling functions
@@ -65,6 +67,32 @@ class MainApp(QMainWindow, FORM_CLASS):
         self.noise_slider.valueChanged.connect(self.update_noise_level)
         self.delete_btn.clicked.connect(self.delete_signal)
         self.freq_slider.valueChanged.connect(self.update_fs)
+        self.comboBox_fmax.currentIndexChanged.connect(self.multp_fmax)
+
+    def multp_fmax(self):
+        selected_frequency = self.comboBox_fmax.currentText()
+        if self.way_of_plotting_with_add:
+            fs_max = self.original_fs / 2
+        else:
+            fs_max = self.mixer.overall_max_frequency
+        if selected_frequency == "1x Fmax":
+            new_fs = fs_max  # Reset to the original sampling frequency
+        elif selected_frequency == "2x Fmax":
+            new_fs = fs_max * 2
+        elif selected_frequency == "3x Fmax":
+            new_fs = fs_max * 3
+        elif selected_frequency == "4x Fmax":
+            new_fs = fs_max * 4
+
+        # Update the slider position with the nearest integer value
+        new_slider_position = round(new_fs)
+        self.freq_slider.setSliderPosition(new_slider_position)
+        
+        # Update the actual value in the slider
+        self.freq_slider.setValue(new_slider_position)
+
+        # Update the sampling frequency and re-plot
+        self.update_fs(new_fs)
 
     def open_mixer(self):
         """
@@ -92,22 +120,20 @@ class MainApp(QMainWindow, FORM_CLASS):
             self.count_signals += 1
             file_name = file_path.split("/")[-1]
             signal_data = pd.read_csv(file_name)
-            time_column = signal_data.iloc[:1000, 0]
+            time_column = signal_data.iloc[:1000, 1]
             values_column = signal_data.iloc[:1000, -1]
             time_values = time_column.tolist()
             v_values = values_column.tolist()
-            self.first_element_of_time = time_values[1] - time_values[0]
-            self.max_x_1 = max(time_values)
-            self.number_of_points = len(time_values)
-
+            self.original_fs = int(signal_data["Sampling Freq"][0])
+            self.fs = int(signal_data["Sampling Freq"][0])
+            self.freq_slider.setRange(int(self.fs / 8), int(self.fs * 4))
+            self.freq_slider.setSliderPosition(self.fs)
+            self.freq_slider.setValue(self.fs)  # Set the value to 125
             # Making a new item in the dictionary, the new signal is given a key, and the values is given according to its data
             self.signals_data[self.count_signals] = [time_values, v_values, 'Red', f"{'Signal'} - {self.count_signals}"]
             self.comboBox_2.addItem(f"{'Signal'} - {self.count_signals}")
             self.way_of_plotting_with_add = True
-        self.fs = 125
-        self.freq_slider.setRange(int(self.fs / 8), int(self.fs * 4))
-        self.freq_slider.setSliderPosition(125)
-        self.freq_slider.setValue(self.fs)  # Set the value to 125
+
         self.plot_graph()
 
     def plot_graph(self):
@@ -117,38 +143,38 @@ class MainApp(QMainWindow, FORM_CLASS):
         self.clear_all()
         if self.way_of_plotting_with_add:
             for value in self.signals_data.values():
-                pen = pg.mkPen(color=(255, 0, 0))
                 x = value[0]
                 y = value[1]
                 # Apply noise to 'y' values
                 random.seed(0)
                 noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in y]
-                # Set the sampling rate
                 self.graphicsView.plot(x, noisy_y, pen="r")
-                time_interval = 1 / self.fs
-                sampled_x, sampled_y = self.sample_signal(x, noisy_y, self.fs , 0)
-                reconstructed_signal = np.zeros(len(x))
-                for i, t in enumerate(x):
-                    reconstructed_signal[i] = np.sum(sampled_y * np.sinc((t - sampled_x) / time_interval))
-
+                # Set the sampling rate
+                sampled_x, sampled_y = self.sample_signal(x, y, self.fs, 0)
+                reconstructed_signal = self.sinc_interpolation(sampled_x, sampled_y, self.fs, x)
                 self.graphicsView.plot(sampled_x, sampled_y, pen=None, symbol='o', symbolBrush='b')
                 reconstruction_pen = pg.mkPen(color=(0, 0, 255))
                 self.graphicsView_2.plot(x, reconstructed_signal, pen=reconstruction_pen)
 
 
                 error = [abs(original - reconstructed) for original, reconstructed in
-                         zip(y, reconstructed_signal)]
+                         zip(noisy_y, reconstructed_signal)]
                 # Filter error values above the threshold
                 error_above_threshold = [err if err > self.error_threshold else 0 for err in error]
                 # Plot the error above the threshold
                 error_pen = pg.mkPen(color="r")
+                self.graphicsView_3.setYRange(0, 2)
                 self.graphicsView_3.plot(x, error_above_threshold, pen=error_pen)
+                
 
         else:
             # Apply noise to 'y' values
             random.seed(0)
             noisy_y = [v + random.uniform(-self.noise_level, self.noise_level) for v in self.mixer.syntheticSignal]
+            self.graphicsView.setYRange(min(noisy_y), max(noisy_y)) 
+            self.graphicsView.setXRange(min(self.mixer.sin_time), max(self.mixer.sin_time))
             self.graphicsView.plot(self.mixer.sin_time, noisy_y, pen=pg.mkPen(color=(255, 0, 0)))
+            # Set the sampling rate
             sampled_x, sampled_y = self.sample_signal(self.mixer.sin_time, noisy_y, self.fs, 0.005)
             self.graphicsView.plot(sampled_x, sampled_y, pen=None, symbol='o', symbolBrush='b')
             reconstructed_signal = self.sinc_interpolation(sampled_x, sampled_y, self.fs, self.mixer.sin_time)
@@ -166,6 +192,9 @@ class MainApp(QMainWindow, FORM_CLASS):
             # Plot the error above the threshold
             error_pen = pg.mkPen(color="r")
             self.graphicsView_3.plot(self.mixer.sin_time, error_above_threshold, pen=error_pen)
+           
+        
+            
            
 
     
@@ -257,23 +286,9 @@ class MainApp(QMainWindow, FORM_CLASS):
             value (int): The new sampling frequency.
         """
         self.fs = value
-        self.freq_slider.setSingleStep(125)  # Set step size
         self.freq_lbl.setText(f"Sampling frequency is {str(self.fs)}")
-        self.error_threshold = 0.1  # Define your error threshold value
-        if self.way_of_plotting_with_add:
-            if self.fs > 125:
-                self.error_threshold = 0.5  # Define your error threshold value
-        else:
-            print(self.fs)
-            print(self.mixer.overall_max_frequency * 2)
-            if self.fs >= self.mixer.overall_max_frequency * 2:
-                self.error_threshold = 2.5  # Define your error threshold value
+        self.error_threshold = 0.3   # Define your error threshold value
         self.plot_graph()
-
-        # Update to set the slider position and value to 125 if value is 125
-        if value == 125:
-            self.freq_slider.setSliderPosition(125)
-            self.freq_slider.setValue(125)
 
     def reindex_dict_keys(self, dictionary):
         """
@@ -329,11 +344,13 @@ class MainApp(QMainWindow, FORM_CLASS):
                 selected_item_text = self.comboBox_2.currentText()
                 # Use del to delete the key from the dictionary
                 del self.mixer.sinusoidals[selected_item_text]
-                self.comboBox_2.removeItem(self.comboBox_2.currentIndex())
+                self.comboBox_2.removeItem(self.comboBox_2.currentIndex() - 1)
                 self.clear_all()
                 self.signals_data = self.reindex_dict_keys(self.mixer.sinusoidals)
                 self.refill_combo_from_dict(self.comboBox_2, self.mixer.sinusoidals)
                 self.mixer.sumSignals()
+                if not self.mixer.sinusoidals : 
+                    self.way_of_plotting_with_add = True
         self.plot_graph()
 
 

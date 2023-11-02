@@ -1,8 +1,5 @@
 # Import necessary libraries and modules
-from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.uic import loadUiType
 from UliEngineering.SignalProcessing.Simulation import sine_wave  # Import custom signal processing module
 import sys
@@ -14,6 +11,7 @@ from main import MainApp  # Assuming there's a 'main' module for the main applic
 
 # Load the UI file for the mixer application
 FORM_CLASS, _ = loadUiType(path.join(path.dirname(__file__), "mixer.ui"))
+
 
 # Define the MixerApp class, a QDialog-based application for constructing and visualizing synthetic signals
 class MixerApp(QDialog, FORM_CLASS):
@@ -32,18 +30,23 @@ class MixerApp(QDialog, FORM_CLASS):
         self.sin_time = np.linspace(0, 3, 4000)
         # Store sine waves as a dictionary
         self.sinusoidals = {}
-        self.sin_names = []
         # Set the background color of the graphics view
         self.sin_graphics_view.setBackground('w')
         # Set the x-axis label of the graphics view 
         self.sin_graphics_view.setLabel('bottom', 'time')
+        self.signalMagnitude.setText('1')
+        self.signalPhase.setText('0')
+        self.resize(800, 400)  # Set the width and height according to your needs
 
     def handle_btn(self):
         """
         Connect buttons to their respective functions.
         """
-        self.plot_push_btn.clicked.connect(self.construct_signal)
-        self.add_push_btn.clicked.connect(self.add_to_main)
+        self.send_push_btn.clicked.connect(self.add_to_main)
+        self.add_push_btn.clicked.connect(self.construct_signal)
+        self.signalFrequency.textChanged.connect(self.draw_signal_live)
+        self.signalMagnitude.textChanged.connect(self.draw_signal_live)
+        self.signalPhase.textChanged.connect(self.draw_signal_live)
 
     def add_to_main(self):
         """
@@ -82,17 +85,7 @@ class MixerApp(QDialog, FORM_CLASS):
         phase_input = self.signalPhase.text()
         name_input = self.signalName.text()
 
-        # Validate the frequency input
-        try:
-            sin_frequency = float(freq_input)
-            if sin_frequency <= 0:
-                QMessageBox.warning(self, 'Invalid Input', 'Frequency must be a positive number.')
-                return
-        except ValueError:
-            QMessageBox.warning(self, 'Invalid Input', 'Frequency must be a valid number.')
-            return
-
-        # Validate magnitude and phase inputs as needed
+        sin_frequency = float(freq_input)
         try:
             sin_magnitude = float(magnitude_input)
             sin_phase = float(phase_input)
@@ -115,8 +108,6 @@ class MixerApp(QDialog, FORM_CLASS):
         self.sinusoidal = sine_wave(frequency=sin_frequency, samplerate=len(self.sin_time), amplitude=sin_magnitude,
                                     phaseshift=sin_phase)
         self.sinusoidals[name_input] = self.sinusoidal
-        self.sin_names.append(name_input)
-
         # Draw and display the synthetic signal
         self.drawSyntheticSignal(self.sin_graphics_view)
 
@@ -147,6 +138,48 @@ class MixerApp(QDialog, FORM_CLASS):
         self.sample_rate = len(self.sin_time)
         self.max_freqs = self.calculate_max_frequencies(list(self.sinusoidals.values()), self.sample_rate)
         self.overall_max_frequency = max(self.max_freqs)
+
+    def draw_signal_live(self):
+        # Get input values from QLineEdit widgets
+        freq_input = self.signalFrequency.text()
+        magnitude_input = self.signalMagnitude.text()
+        phase_input = self.signalPhase.text()
+
+        if freq_input:  # Check if frequency input is not empty
+            try:
+                sin_frequency = float(freq_input)
+                if sin_frequency <= 0:
+                    QMessageBox.warning(self, 'Invalid Input', 'Frequency must be a positive number.')
+                    self.sin_graphics_view.clear()
+                    return
+            except ValueError:
+                QMessageBox.warning(self, 'Invalid Input', 'Frequency must be a valid number.')
+                self.sin_graphics_view.clear()
+                return
+        else:
+            # Case where frequency input is empty
+            self.sin_graphics_view.clear()
+            return
+
+
+        if magnitude_input and phase_input:  # Check if magnitude and phase inputs are not empty
+            try:
+                sin_magnitude = float(magnitude_input)
+                sin_phase = float(phase_input)
+            except ValueError:
+                QMessageBox.warning(self, 'Invalid Input', 'Magnitude and Phase must be valid numbers.')
+                return
+        else:
+            # Case where magnitude or phase input is empty
+            self.sin_graphics_view.clear()
+            return
+
+
+        #  Rest of your code for generating the synthetic signal and plotting
+        synthetic_signal = sine_wave(frequency=sin_frequency, samplerate=len(self.sin_time), amplitude=sin_magnitude, phaseshift=sin_phase)
+
+        self.sin_graphics_view.clear()
+        self.sin_graphics_view.plot(self.sin_time, synthetic_signal, pen=pg.mkPen(color=(255, 0, 0)))
 
     def calculate_max_frequency(self, sinusoidal, sample_rate):
         """
@@ -190,13 +223,14 @@ class MixerApp(QDialog, FORM_CLASS):
             max_freq = self.calculate_max_frequency(sinusoidal, sample_rate)
             max_frequencies.append(max_freq)
         return max_frequencies
- 
+
 
 def main():  # method to start app
-        app = QApplication(sys.argv)
-        window = MixerApp()
-        window.show()
-        app.exec_()  # infinte Loop
+    app = QApplication(sys.argv)
+    window = MixerApp()
+    window.show()
+    app.exec_()  # infinte Loop
+
 
 if __name__ == '__main__':
-        main()
+    main()
