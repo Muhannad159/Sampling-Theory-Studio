@@ -197,7 +197,6 @@ class MixerApp(QDialog, FORM_CLASS):
 
         # Step 3: Identify the maximum magnitude and its corresponding frequency index.
         magnitudes = np.abs(fft_result)
-        max_magnitude = np.max(magnitudes)
         max_magnitude_index = np.argmax(magnitudes)
 
         # Step 4: Find the corresponding frequency for the maximum magnitude.

@@ -40,7 +40,6 @@ class MainApp(QMainWindow, FORM_CLASS):
         self.comboBox_fmax.setCurrentIndex(1)
         self.noise_slider.setRange(0, 100)  # Set the noise level range
         self.noise_level = 0  # Initialize the noise level
-        self.error_threshold = 0.1  # Define your error threshold value
         self.way_of_plotting_with_add = True  # Flag to determine the signal source
         self.handle_btn()  # Connect UI elements to their handling functions
 
@@ -160,7 +159,8 @@ class MainApp(QMainWindow, FORM_CLASS):
                 error = [abs(original - reconstructed) for original, reconstructed in
                          zip(noisy_y, reconstructed_signal)]
                 # Filter error values above the threshold
-                error_above_threshold = [err if err > self.error_threshold else 0 for err in error]
+                error_threshold= 0.3
+                error_above_threshold = [err if err > error_threshold else 0 for err in error]
                 # Plot the error above the threshold
                 error_pen = pg.mkPen(color="r")
                 self.graphicsView_3.setYRange(0, 2)
@@ -188,7 +188,8 @@ class MainApp(QMainWindow, FORM_CLASS):
             error = [abs(original - reconstructed) for original, reconstructed in
                      zip(noisy_y, reconstructed_signal)]
             # Filter error values above the threshold
-            error_above_threshold = [err if err > self.error_threshold else 0 for err in error]
+            error_threshold = 0.5
+            error_above_threshold = [err if err > error_threshold else 0 for err in error]
             # Plot the error above the threshold
             error_pen = pg.mkPen(color="r")
             self.graphicsView_3.plot(self.mixer.sin_time, error_above_threshold, pen=error_pen)
@@ -287,7 +288,6 @@ class MainApp(QMainWindow, FORM_CLASS):
         """
         self.fs = value
         self.freq_lbl.setText(f"Sampling frequency is {str(self.fs)}")
-        self.error_threshold = 0.3   # Define your error threshold value
         self.plot_graph()
 
     def reindex_dict_keys(self, dictionary):
