@@ -105,8 +105,9 @@ class MixerApp(QDialog, FORM_CLASS):
             suffix += 1
 
         # Create the sine wave and add it to the dictionary
-        self.sinusoidal = sine_wave(frequency=sin_frequency, samplerate=len(self.sin_time), amplitude=sin_magnitude,
-                                    phaseshift=sin_phase)
+        # self.sinusoidal = sine_wave(frequency=sin_frequency, samplerate=len(self.sin_time), amplitude=sin_magnitude,
+        #                             phaseshift=sin_phase)
+        self.sinusoidal = sin_magnitude * np.sin(2*np.pi * sin_frequency * self.sin_time + sin_phase)
         self.sinusoidals[name_input] = self.sinusoidal
         # Draw and display the synthetic signal
         self.drawSyntheticSignal(self.sin_graphics_view)
@@ -176,8 +177,7 @@ class MixerApp(QDialog, FORM_CLASS):
 
 
         #  Rest of your code for generating the synthetic signal and plotting
-        synthetic_signal = sine_wave(frequency=sin_frequency, samplerate=len(self.sin_time), amplitude=sin_magnitude, phaseshift=sin_phase)
-
+        synthetic_signal = sin_magnitude * np.sin(2 * np.pi * sin_frequency * self.sin_time + sin_phase)
         self.sin_graphics_view.clear()
         self.sin_graphics_view.plot(self.sin_time, synthetic_signal, pen=pg.mkPen(color=(255, 0, 0)))
 

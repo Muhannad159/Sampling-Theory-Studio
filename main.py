@@ -43,20 +43,6 @@ class MainApp(QMainWindow, FORM_CLASS):
         self.way_of_plotting_with_add = True  # Flag to determine the signal source
         self.handle_btn()  # Connect UI elements to their handling functions
 
-    def center_on_screen(self):
-        """
-        Center the application window on the screen.
-        """
-        # Calculate the center coordinates for a 1920x1080 screen
-        screen_width = 1920
-        screen_height = 1080
-        window_width = self.frameGeometry().width()
-        window_height = self.frameGeometry().height()
-        x = (screen_width - window_width) // 2
-        y = (screen_height - window_height) // 2
-        # Set the window's position to the center
-        self.move(x, y)
-
     def handle_btn(self):
         """
         Connect UI elements to their respective handling functions.
@@ -127,7 +113,7 @@ class MainApp(QMainWindow, FORM_CLASS):
             self.fs = int(signal_data["Sampling Freq"][0])
             self.freq_slider.setRange(int(self.fs / 8), int(self.fs * 4))
             self.freq_slider.setSliderPosition(self.fs)
-            self.freq_slider.setValue(self.fs)  # Set the value to 125
+            self.freq_slider.setValue(self.fs)
             # Making a new item in the dictionary, the new signal is given a key, and the values is given according to its data
             self.signals_data[self.count_signals] = [time_values, v_values, 'Red', f"{'Signal'} - {self.count_signals}"]
             self.comboBox_2.addItem(f"{'Signal'} - {self.count_signals}")
@@ -159,7 +145,7 @@ class MainApp(QMainWindow, FORM_CLASS):
                 error = [abs(original - reconstructed) for original, reconstructed in
                          zip(noisy_y, reconstructed_signal)]
                 # Filter error values above the threshold
-                error_threshold= 0.3
+                error_threshold = 0.3
                 error_above_threshold = [err if err > error_threshold else 0 for err in error]
                 # Plot the error above the threshold
                 error_pen = pg.mkPen(color="r")
@@ -192,6 +178,7 @@ class MainApp(QMainWindow, FORM_CLASS):
             error_above_threshold = [err if err > error_threshold else 0 for err in error]
             # Plot the error above the threshold
             error_pen = pg.mkPen(color="r")
+            self.graphicsView_3.setYRange(min(reconstructed_signal),max(reconstructed_signal))
             self.graphicsView_3.plot(self.mixer.sin_time, error_above_threshold, pen=error_pen)
            
         
